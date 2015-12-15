@@ -11,8 +11,8 @@ Currently this sometimes fails tests 3 and 4 as barcodes are not always output
 in the same order even though the numbers add up.
 
 ```
-git clone ...
-cd ..
+git clone https://github.com/brwnj/fastq-multx
+cd fastq-multx
 make
 ```
 

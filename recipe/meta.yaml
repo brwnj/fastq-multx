@@ -4,8 +4,8 @@ package:
 build:
   number: 1
 source:
-  fn: .tar.bz2
-  url: https://github.com/.tar.gz
+  fn: fastq-multx-1.02.999.tar.gz
+  url: https://github.com/brwnj/fastq-multx/archive/v1.02.999.tar.gz
 requirements:
   build:
     - gcc
