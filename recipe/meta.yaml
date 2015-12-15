@@ -1,10 +1,10 @@
 package:
   name: fastq-multx
-  version: 1.02.999
+  version: 1.3.0
 build:
   number: 1
 source:
-  fn: fastq-multx-1.02.999.tar.gz
+  fn: fastq-multx-1.3.0.tar.gz
   url: https://github.com/brwnj/fastq-multx/archive/v1.02.999.tar.gz
 requirements:
   build:
@@ -14,6 +14,6 @@ test:
     commands:
         - fastq-multx
 about:
-  home:
+  home: https://github.com/brwnj/fastq-multx
   license: MIT
   summary: Demultiplexes a fastq. Capable of auto-determining barcode id's based on a master set fields. Keeps multiple reads in-sync during demultiplexing. Can verify that the reads are in-sync as well, and fail if they're not.

@@ -7,14 +7,15 @@ Erik Aronesty (2013). TOBioiJ : "Comparison of Sequencing Utility Programs", DOI
 The version ends with 999 as I didn't want to play with the SVN repo versioning.
 
 # Build
-Currently this sometimes fails tests 3 and 4 as barcodes are not always output
-in the same order even though the numbers add up.
 
 ```
 git clone https://github.com/brwnj/fastq-multx
 cd fastq-multx
 make
 ```
+
+Sequences are sometimes output to STDOUT in a different order on OS X versus
+Redhat, therefore some tests may fail.
 
 # Example Usage
 
