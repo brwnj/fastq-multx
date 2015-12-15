@@ -4,7 +4,10 @@ This is the work of:
 
 Erik Aronesty (2013). TOBioiJ : "Comparison of Sequencing Utility Programs", DOI:10.2174/1875036201307010001
 
-The version ends with 999 as I didn't want to play with the SVN repo versioning.
+# Changes
+
+ The Versioning here is awful. I've bumped the version with no alterations to
+ the original algorithm of Erik.
 
 # Build
 
