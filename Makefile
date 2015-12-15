@@ -1,10 +1,9 @@
-CC=gcc
-CFLAGS=-Wall -Wno-unused-function -O2
-PROG=fastq-multx
+CC=g++
+CFLAGS=-O3 -I.
 
-all: $(PROG)
+all: fastq-multx
 
-fastq-multx: fastq-multx.cpp fastq-lib.cpp fastq-lib.h
+%: %.cpp fastq-lib.cpp fastq-lib.h
 	$(CC) $(CFLAGS) $< fastq-lib.cpp -o $@
 
 check:
