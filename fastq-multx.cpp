@@ -35,7 +35,7 @@ See "void usage" below for usage.
 #define endstr(e) (e=='e'?"end":e=='b'?"start":"n/a")
 
 const char * VERSION = "1.3";
-#define SVNREV 0
+#define SVNREV 1
 
 // barcode
 struct bc {
