@@ -1147,7 +1147,7 @@ void usage(FILE *f) {
 "-B BCFIL    Use barcodes from BCFIL, no determination step, codes in <read1.fq>\n"
 "-H          Use barcodes from illumina's header, instead of a read\n"
 "-b          Force beginning of line (5') for barcode matching\n"
-"-e          Force end of line (3') for batcode matching\n"
+"-e          Force end of line (3') for barcode matching\n"
 "-t NUM      Divide threshold for auto-determine by factor NUM (1), > 1 = more sensitive\n"
 "-G NAME     Use group(s) matching NAME only\n"
 "-x          Don't trim barcodes off before writing out destination\n"
