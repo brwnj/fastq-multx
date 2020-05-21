@@ -22,10 +22,23 @@ Redhat, therefore some tests may fail.
 
 # Example Usage
 
+## Single index
+
 ```
 fastq-multx -B barcodes.tsv -m 0 \
     Undetermined_S0_L001_I1_001.fastq.gz \
     Undetermined_S0_L001_R1_001.fastq.gz \
     Undetermined_S0_L001_R2_001.fastq.gz \
     -o n/a -o %_R1.fastq -o %_R2.fastq
+```
+
+## Dual Index
+
+```
+fastq-multx -B barcodes.tsv -m 0 \
+    Undetermined_S0_L001_I1_001.fastq.gz \
+    Undetermined_S0_L001_I2_001.fastq.gz \
+    Undetermined_S0_L001_R1_001.fastq.gz \
+    Undetermined_S0_L001_R2_001.fastq.gz \
+    -o n/a -o n/a -o %_R1.fastq -o %_R2.fastq
 ```
