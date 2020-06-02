@@ -34,7 +34,7 @@ See "void usage" below for usage.
 #define THFIXFACTOR 20
 #define endstr(e) (e=='e'?"end":e=='b'?"start":"n/a")
 
-const char * VERSION = "1.3";
+const char * VERSION = "1.4";
 #define SVNREV 1
 
 // barcode
@@ -103,6 +103,9 @@ int main (int argc, char **argv) {
 	char c;
 	bool trim = true;
 	int mismatch = 1;
+	int mismatchdual = -1;
+	int mismatchtotal = 1;
+        bool indepmm = false;
 	int distance = 2;
 	int poor_distance = 0;       // count of skipped reads on distance only
 	int quality = 0;
@@ -126,7 +129,7 @@ int main (int argc, char **argv) {
 	int i;
 	bool omode = false;
 	char *bfil = NULL;
-	while (	(c = getopt (argc, argv, "-DzxnHhbeov:m:B:g:L:l:G:q:d:t:")) != -1) {
+	while (	(c = getopt (argc, argv, "-DzxnHhbeov:m:M:B:g:L:l:G:q:d:t:")) != -1) {
 		switch (c) t:{
 		case '\1':
                        	if (omode) {
@@ -167,6 +170,7 @@ int main (int argc, char **argv) {
 		case 'n': noexec = true; break;
 		case 't': threshfactor = atof(optarg); break;
 		case 'm': mismatch = atoi(optarg); break;
+		case 'M': mismatchdual = atoi(optarg); break;
 		case 'd': distance = atoi(optarg); break;
 		case 'q': quality = atoi(optarg); break;
 		case 'D': ++debug; break;
@@ -183,6 +187,12 @@ int main (int argc, char **argv) {
              	     return 1;
 		}
 	}
+
+        mismatchtotal = mismatch;
+        if (mismatchdual >= 0) {
+            mismatchtotal += mismatchdual;
+            indepmm = true;
+        }
 
 	if (group && !list) {
 		fprintf(stderr, "Error: -G only works with -l\n");
@@ -763,7 +773,7 @@ int main (int argc, char **argv) {
         fprintf(stderr, "End used: %s\n", endstr(end));
 
         if (dual && list) {
-            // trim down possiblities to reduce number of open files, and small stub files
+            // trim down possibilities to reduce number of open files, and small stub files
             dend = (dne > dnb) ? 'e' : 'b';
             fprintf(stderr, "Dual-end used: %s\n", endstr(dend));
             int ocnt = bcnt;
@@ -874,7 +884,7 @@ int main (int argc, char **argv) {
 		++nrec;
 		if (read_ok < 0) continue;
 
-		int i, best=-1, bestmm=mismatch+distance+1, bestd=mismatch+distance+1, next_best=mismatch+distance*2+1;
+		int i, best=-1, bestmm=mismatchtotal+distance+1, bestd=mismatchtotal+distance+1, next_best=mismatchtotal+distance*2+1;
 
         if (bcinheader) {
             for (i=f_n-1;i>=0;--i) {
@@ -909,6 +919,7 @@ int main (int argc, char **argv) {
         // for each barcode
         for (i =0; i < bcnt; ++i) {
             int d;
+            int dd = 0;
             if (end == 'e') {
                 if (bc[i].shifted) {
                     if (fq[0].seq.n > bc[i].seq.n) {
@@ -926,10 +937,18 @@ int main (int argc, char **argv) {
 
                 if (dual) {
                     // distance is added in for duals
-                    if (fq[1].seq.n >= bc[i].dual_n) {
-                        d+=hd(fq[1].seq.s+fq[1].seq.n-bc[i].dual_n, bc[i].dual, bc[i].dual_n);
+                    if (indepmm) {
+                        if (fq[1].seq.n >= bc[i].dual_n) {
+                            dd+=hd(fq[1].seq.s+fq[1].seq.n-bc[i].dual_n, bc[i].dual, bc[i].dual_n);
+                        } else {
+                            dd+=bc[i].dual_n;
+                        }
                     } else {
-                        d+=bc[i].dual_n;
+                        if (fq[1].seq.n >= bc[i].dual_n) {
+                            d+=hd(fq[1].seq.s+fq[1].seq.n-bc[i].dual_n, bc[i].dual, bc[i].dual_n);
+                        } else {
+                            d+=bc[i].dual_n;
+                        }
                     }
                 }
             } else {
@@ -939,8 +958,12 @@ int main (int argc, char **argv) {
                     d=hd(fq[0].seq.s,bc[i].seq.s, bc[i].seq.n);
 
                 // distance is added in for duals
-                if (dual)
-                    d+=hd(fq[1].seq.s,bc[i].dual, bc[i].dual_n);
+                if (dual) {
+                    if (indepmm)
+                        dd+=hd(fq[1].seq.s,bc[i].dual, bc[i].dual_n);
+                    else
+                        d+=hd(fq[1].seq.s,bc[i].dual, bc[i].dual_n);
+                }
 
                 //				if (debug > 1) {
                 //					fprintf(stderr, "index: %d dist: %d bc:%s n:%d", i, d, bc[i].seq.s, bc[i].seq.n);
@@ -949,22 +972,22 @@ int main (int argc, char **argv) {
                 //				}
             }
             // simple...
-            if (d < bestd) {
+            if ((d + dd) < bestd) {
                 next_best=bestd;
-                bestd=d;
+                bestd=d+dd;
                 if (debug > 1) fprintf(stderr,"next_dist: %d, best_seq: %s:%d\n", next_best, bc[i].seq.s, bestd);
             }
             // if exact match
-            if (d==0) {
+            if ((d+dd)==0) {
                 if (debug) fprintf(stderr, ", found bc: %d bc:%s n:%d, bestd: %d, next_best: %d", i, bc[i].seq.s, bc[i].seq.n, bestd, next_best);
                 best=i;
                 break;
-            } else if (d <= mismatch) {
+            } else if ((d+dd) <= mismatchtotal && (!indepmm || (d <= mismatch && dd <= mismatchdual))) {
                 // if ok match
-                if (d == bestmm) {
+                if ((d+dd) == bestmm) {
                     best=-1;		// more than 1 match... bad
-                } else if (d < bestmm) {
-                    bestmm=d;		// best match...ok
+                } else if ((d+dd) < bestmm) {
+                    bestmm=d+dd;		// best match...ok
                     best=i;
                 }
             }
@@ -1119,10 +1142,13 @@ void usage(FILE *f) {
 "Output files must contain a '%%' sign which is replaced with the barcode id in the barcodes file.\n"
 "Output file can be n/a to discard the corresponding data (use this for the barcode read)\n"
 "\n"
-"Barcodes file (-B) looks like this:\n"
+"The barcodes file (-B) looks like this [where '-NNNNNNNN' for a dual index is optional]:\n"
 "\n"
-"<id1> <sequence1>\n"
-"<id2> <sequence2> ...\n"
+"sample1 ATGGTCCA-TTGAGGAC\n"
+"sample2 GCCTAAGT-AAGCGTCA\n"
+"...\n"
+"\n"
+"The column delimiter may be a space or a tab.  The best matches in the index file(s) must be unique to a single sample's barcode(s) or the read(s) will be considered unmatched.\n"
 "\n"
 "Default is to guess the -bol or -eol based on clear stats.\n"
 "\n"
@@ -1130,11 +1156,12 @@ void usage(FILE *f) {
 "\n"
 "If -l is used then all barcodes in the file are tried, and the *group* with the *most* matches is chosen.\n"
 "\n"
-"Grouped barcodes file (-l or -L) looks like this:\n"
+"Grouped barcodes file (-l or -L) looks like this [where '-NNNNNNNN' for a dual index is optional]:\n"
 "\n"
-"<id1> <sequence1> <group1>\n"
-"<id1> <sequence1> <group1>\n"
-"<id2> <sequence2> <group2>...\n"
+"sample1 ATGGTCCA-TTGAGGAC group1\n"
+"sample1 GCCTAAGT-AAGCGTCA group1\n"
+"sample2 CTTAGTTC-CCAAGTAC group2\n"
+"...\n"
 "\n"
 "Mated reads, if supplied, are kept in-sync\n"
 "\n"
@@ -1153,7 +1180,8 @@ void usage(FILE *f) {
 "-x          Don't trim barcodes off before writing out destination\n"
 "-n          Don't execute, just print likely barcode list\n"
 "-v C        Verify that mated id's match up to character C (Use ' ' for illumina)\n"
-"-m N        Allow up to N mismatches, as long as they are unique (1)\n"
+"-m N        Allow N mismatches in union of all indexes, unless -M is supplied. (1)\n"
+"-M M        Allow N,M mismatches in indexes 1,2 respectively (see -m N) (not used)\n"
 "-d N        Require a minimum distance of N between the best and next best (2)\n"
 "-q N        Require a minimum phred quality of N to accept a barcode base (0)\n"
 	,VERSION,SVNREV);
