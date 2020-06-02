@@ -34,7 +34,7 @@ See "void usage" below for usage.
 #define THFIXFACTOR 20
 #define endstr(e) (e=='e'?"end":e=='b'?"start":"n/a")
 
-const char * VERSION = "1.3";
+const char * VERSION = "1.4";
 #define SVNREV 1
 
 // barcode
