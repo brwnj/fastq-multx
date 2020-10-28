@@ -1078,7 +1078,7 @@ int main (int argc, char **argv) {
 
 	int j;
 	printf("Id\tCount\tFile(s)\n");
-	int tot=0;
+	long long int tot=0;
 	for (i=0;i<=bcnt;++i) {
 		printf("%s\t%d", bc[i].id.s, bc[i].cnt);
 		tot+=bc[i].cnt;
@@ -1088,7 +1088,7 @@ int main (int argc, char **argv) {
 		}
 		printf("\n");
 	}
-	printf("total\t%d\n", tot);
+	printf("total\t%lld\n", tot);
 
     if (!io_ok)
         return 3;
@@ -1136,7 +1136,7 @@ void pickbest(const void *nodep, const VISIT which, const int depth)
 
 void usage(FILE *f) {
 	fprintf(f,
-"Usage: fastq-multx [-g|-l|-B] <barcodes.fil> <read1.fq> -o r1.%%.fq [mate.fq -o r2.%%.fq] ...\n"
+"Usage: fastq-multx [-g|-l|-B] <barcodes.fil> <read1.fq> [mate.fq] -o r1.%%.fq [-o r2.%%.fq] ...\n"
 "Version: %s.%d\n"
 "\n"
 "Output files must contain a '%%' sign which is replaced with the barcode id in the barcodes file.\n"
