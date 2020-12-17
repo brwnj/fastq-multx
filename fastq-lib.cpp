@@ -89,7 +89,7 @@ int read_fq_sam(FILE *in, int rno, struct fq *fq, const char *name) {
     return 1;
 }
 
-int read_fq(FILE *in, int rno, struct fq *fq, const char *name) {
+int read_fq(FILE *in, long long int rno, struct fq *fq, const char *name) {
     read_line(in, fq->id);
     if (fq->id.s && (*fq->id.s == '>')) {
         fq->id.s[0] = '@';
